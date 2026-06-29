@@ -1,0 +1,29 @@
+name: Reusable Deploy
+
+on:
+  workflow_call:
+    inputs:
+      app_directory:
+        required: true
+        type: string
+      build_command:
+        required: false
+        type: string
+        default: bun run build
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to dev server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USER }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          script: |
+            cd ${{ inputs.app_directory }}
+            git pull
+            bun install
+            ${{ inputs.build_command }}
